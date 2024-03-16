@@ -1,0 +1,229 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model UserMain {
+  id                   String              @id @default(cuid())
+  email                String              @unique
+  name                 String?
+  password             String
+  role                 String              @default("admin")
+  passwordResetToken   String?
+  passwordResetExpires DateTime?
+  verificationToken    String?
+  verificationDeadline DateTime?
+  isVerified           Boolean             @default(false)
+  isActive             Boolean             @default(true)
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  mainCompany          Company?
+  secondaryCompanies   UserMainOnCompany[]
+}
+
+// CompanyInTheMiddle is the company that the user is part of
+model Company {
+  id                          String                      @id @default(cuid())
+  isActive                    Boolean                     @default(true)
+  createdAt                   DateTime                    @default(now())
+  updatedAt                   DateTime                    @updatedAt
+  userMain                    UserMain                    @relation(fields: [userMainId], references: [id])
+  userMainId                  String                      @unique
+  secondaryUsers              UserMainOnCompany[]
+  customers                   Customer[]
+  productsAndServices         ProductAndService[]
+  productAndServiceCategories ProductAndServiceCategory[]
+  TaxCatalog                  TaxCatalog[]
+  proformaInvoices            ProformaInvoice[]
+  invoices                    Invoice[]
+}
+
+// UserMainOnCompanyInTheMiddle is the relation between the user and the company
+model UserMainOnCompany {
+  userMain   UserMain @relation(fields: [userMainId], references: [id])
+  userMainId String
+  company    Company  @relation(fields: [companyId], references: [id])
+  companyId  String
+
+  @@id([userMainId, companyId])
+}
+
+// CUSTOMERS
+
+model Customer {
+  id               String              @id @default(cuid())
+  name             String
+  email            String?
+  phone            String?
+  companyName      String?
+  taxProfile       CustomerTaxProfile?
+  isActive         Boolean             @default(true)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  company          Company             @relation(fields: [companyId], references: [id])
+  companyId        String
+  invoices         Invoice[]
+  proformaInvoices ProformaInvoice[]
+}
+
+model CustomerTaxProfile {
+  id         String   @id @default(cuid())
+  taxId      String?
+  taxName    String?
+  taxSystem  String?
+  taxZipCode String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  customer   Customer @relation(fields: [customerId], references: [id])
+  customerId String   @unique
+}
+
+// PRODUCT AND SERVICES
+
+model ProductAndService {
+  id                          String                     @id @default(cuid())
+  name                        String
+  description                 String
+  internalIdCode              String?
+  price                       Float?
+  taxCode                     String
+  taxMeasurementUnit          String
+  taxMeasurementUnitName      String
+  show                        Boolean?                   @default(true)
+  isService                   Boolean?                   @default(true)
+  taxCatalogs                 TaxCatalog[]
+  isActive                    Boolean                    @default(true)
+  createdAt                   DateTime                   @default(now())
+  updatedAt                   DateTime                   @updatedAt
+  company                     Company                    @relation(fields: [companyId], references: [id])
+  companyId                   String
+  productAndServiceCategory   ProductAndServiceCategory? @relation(fields: [productAndServiceCategoryId], references: [id])
+  productAndServiceCategoryId String?
+  proformaInvoiceItem         ProformaInvoiceItem[]
+}
+
+model ProductAndServiceCategory {
+  id                     String              @id @default(cuid())
+  name                   String
+  description            String
+  taxCode                String
+  taxMeasurementUnit     String
+  taxMeasurementUnitName String
+  taxCatalogs            TaxCatalog[]
+  productsAndServices    ProductAndService[]
+  isActive               Boolean             @default(true)
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  company                Company             @relation(fields: [companyId], references: [id])
+  companyId              String
+}
+
+model TaxCatalog {
+  id                        String                      @id @default(cuid())
+  name                      String
+  description               String
+  taxType                   String //IVA, IEPS, ISR
+  taxFactor                 String //Tasa, Cuota, Exento
+  taxRate                   Float
+  base                      String?                     @default("100% del subtotal") //Tasa, Cuota, Exento
+  taxAWithheldByCustomer    Boolean                     @default(false)
+  company                   Company                     @relation(fields: [companyId], references: [id])
+  companyId                 String
+  productAndServices        ProductAndService[]
+  productAndServiceCategory ProductAndServiceCategory[]
+  isActive                  Boolean                     @default(true)
+  createdAt                 DateTime                    @default(now())
+  updatedAt                 DateTime                    @updatedAt
+}
+
+// INVOICING PROCESS
+
+model ProformaInvoice {
+  id                   String                @id @default(cuid())
+  title                String
+  notes                String?
+  startDate            DateTime
+  endDate              DateTime
+  terms                String?
+  currency             String                @default("MXN")
+  exchangeRate         Float                 @default(1)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  company              Company               @relation(fields: [companyId], references: [id])
+  companyId            String
+  customer             Customer?             @relation(fields: [customerId], references: [id])
+  customerId           String?
+  isActive             Boolean               @default(true)
+  salesQuoteItems      ProformaInvoiceItem[]
+  isProspect           Boolean               @default(false)
+  prospectCompanyName  String?
+  prospectContactName  String?
+  prospectContactEmail String?
+  prospectContactPhone String?
+  invoice              Invoice[]
+  totalPreTaxes        Float                 @default(0)
+}
+
+model ProformaInvoiceItem {
+  id                  String            @id @default(cuid())
+  salesQuote          ProformaInvoice   @relation(fields: [proformaInvoiceId], references: [id])
+  proformaInvoiceId   String
+  productAndService   ProductAndService @relation(fields: [productAndServiceId], references: [id])
+  productAndServiceId String
+  quantity            Float
+  price               Float
+  discount            Float
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  isActive            Boolean           @default(true)
+}
+
+model Invoice {
+  id                 String           @id @default(cuid())
+  facturapiId        String
+  facturapiCreatedAt DateTime
+  livemode           Boolean
+  stampDate          DateTime?
+  emissionDate       DateTime?
+  cfdiVersion        String
+  organization       String
+  date               DateTime
+  verificationUrl    String
+  status             String
+  type               String
+  cancellationStatus String
+  total              Float
+  uuid               String
+  use                String
+  folioNumber        String
+  series             String
+  paymentForm        String
+  paymentMethod      String
+  currency           String
+  exchange           Float
+  salesQuote         ProformaInvoice? @relation(fields: [salesQuoteId], references: [id])
+  salesQuoteId       String?
+  legalName          String?
+  taxId              String?
+  taxZipCode         String?
+  taxSystem          String?
+  customerId         String?
+  customer           Customer?        @relation(fields: [customerId], references: [id])
+  notes              String?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  company            Company          @relation(fields: [companyId], references: [id])
+  companyId          String
+  isActive           Boolean          @default(true)
+}
