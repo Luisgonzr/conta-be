@@ -27,8 +27,15 @@ async function bootstrap() {
   const reflector = app.get(Reflector);
   app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
   const configService = app.get(ConfigService);
-  app.setGlobalPrefix('api',{
-    exclude: [{ path: 'auth', method: RequestMethod.POST }],
+  app.setGlobalPrefix('api', {
+    exclude: [
+      'auth/login',
+      'auth/signin',
+      'auth/verify',
+      'auth/forgot-password',
+      'auth/reset-password',
+      'auth/refresh-token',
+    ],
   });
   app.enableCors(CORS);
   await app.listen(configService.get('PORT'));

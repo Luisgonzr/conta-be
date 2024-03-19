@@ -7,6 +7,7 @@ import { UtilsService } from './utils/utils.service';
 import { ResetPasswordEmailService } from './mailing/emails/reset-password-email/reset-password-email/reset-password-email.service';
 import { ForgotPasswordEmailService } from './mailing/emails/forgot-password-email/forgot-password-email/forgot-password-email.service';
 import { VerifiedEmailService } from './mailing/emails/verified-email/verified-email/verified-email.service';
+import { GetParamsService } from './get-params-service/get-params.service';
 
 @Module({
   imports: [HttpModule, ConfigModule.forRoot()],
@@ -16,6 +17,7 @@ import { VerifiedEmailService } from './mailing/emails/verified-email/verified-e
     VerifiedEmailService,
     ForgotPasswordEmailService,
     ResetPasswordEmailService,
+    GetParamsService,
   ],
   providers: [
     MailingService,
@@ -24,6 +26,7 @@ import { VerifiedEmailService } from './mailing/emails/verified-email/verified-e
     ForgotPasswordEmailService,
     ResetPasswordEmailService,
     UtilsService,
+    GetParamsService,
   ],
 })
 export class SharedModule {}

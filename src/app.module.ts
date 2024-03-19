@@ -7,6 +7,7 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { TaxCatalogModule } from './modules/tax-catalog/tax-catalog.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { AuthModule } from './modules/auth/auth.module';
       ],
     }),
     AuthModule,
+    TaxCatalogModule,
   ],
   controllers: [AppController],
   providers: [
