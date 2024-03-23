@@ -6,7 +6,10 @@ import { ForgotPasswordEmailService } from 'src/shared/mailing/emails/forgot-pas
 import { ResetPasswordEmailService } from 'src/shared/mailing/emails/reset-password-email/reset-password-email/reset-password-email.service';
 import { SigninEmailService } from 'src/shared/mailing/emails/signin-email/signin-email.service';
 import { VerifiedEmailService } from 'src/shared/mailing/emails/verified-email/verified-email/verified-email.service';
-import { UtilsService } from 'src/shared/utils/utils.service';
+import {
+  MomentMeasurements,
+  UtilsService,
+} from 'src/shared/utils/utils.service';
 import {
   ForgotParams,
   LoginParams,
@@ -42,6 +45,19 @@ export class AuthService {
       .findUnique({
         where: {
           email: loginData.email,
+          //verificationToken: null,
+          /*OR: [
+            {
+              verificationDeadline: {
+                gt: new Date(),
+              },
+            },
+            {
+              verificationDeadline: {
+                equals: null,
+              },
+            },
+          ],*/
         },
         include: {
           mainCompany: {
@@ -108,6 +124,10 @@ export class AuthService {
           password: passwordHash,
           name: signinData.name,
           verificationToken: verificationToken,
+          verificationDeadline: this.utilsService.getExpirationDate(
+            5,
+            MomentMeasurements.days,
+          ),
           mainCompany: {
             create: {},
           },
@@ -122,7 +142,7 @@ export class AuthService {
         throw error;
       });
     // SEND EMAIL
-    const actionUrl = `${this.configService.get(
+    /*const actionUrl = `${this.configService.get(
       'FRONTEND_URL',
     )}/auth/verify?email=${
       signinData.email
@@ -135,7 +155,7 @@ export class AuthService {
       })
       .catch((error) => {
         console.log(error);
-      });
+      });*/
     return new SigninResponseDto(userMain);
   }
 
