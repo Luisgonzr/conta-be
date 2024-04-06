@@ -10,6 +10,7 @@ export interface GetParams {
   perpage?: number;
   orderBy?: string;
   orderType?: orderType;
+  cursor?: string;
 }
 
 @Injectable()
@@ -40,6 +41,25 @@ export class GetParamsService {
     return {
       orderBy: tobeOrderBy,
       orderType: tobeOrderType.toLocaleLowerCase(),
+    };
+  }
+
+  getStandardParamsCursor(query: GetParams, cursorName = 'id') {
+    let cursor = null;
+    let skip = 0;
+    if (query.cursor) {
+      cursor = {
+        [cursorName]: query.cursor,
+      };
+      skip = 1;
+    }
+    const take = query.perpage || 5;
+    const order = this.buildOrderBy(query.orderBy, query.orderType);
+    return {
+      cursor,
+      skip,
+      take,
+      order,
     };
   }
 }
