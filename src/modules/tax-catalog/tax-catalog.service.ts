@@ -22,7 +22,11 @@ export class TaxCatalogService {
     ) {
       throw new ConflictException('Error while processing request');
     }
-    if (body.taxFactor !== 'Tasa' && body.taxFactor !== 'Cuota') {
+    if (
+      body.taxFactor !== 'Tasa' &&
+      body.taxFactor !== 'Cuota' &&
+      body.taxFactor !== 'Exento'
+    ) {
       throw new ConflictException('Error while processing request');
     }
     return this.prismaService.taxCatalog.create({
