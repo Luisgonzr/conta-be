@@ -8,6 +8,8 @@ import { ResetPasswordEmailService } from './mailing/emails/reset-password-email
 import { ForgotPasswordEmailService } from './mailing/emails/forgot-password-email/forgot-password-email/forgot-password-email.service';
 import { VerifiedEmailService } from './mailing/emails/verified-email/verified-email/verified-email.service';
 import { GetParamsService } from './get-params-service/get-params.service';
+import { MexicoInvoicingRulesService } from './mexico-invoicing-rules/mexico-invoicing-rules.service';
+import { FacturapiService } from './facturapi/facturapi.service';
 
 @Module({
   imports: [HttpModule, ConfigModule.forRoot()],
@@ -27,6 +29,8 @@ import { GetParamsService } from './get-params-service/get-params.service';
     ResetPasswordEmailService,
     UtilsService,
     GetParamsService,
+    MexicoInvoicingRulesService,
+    FacturapiService,
   ],
 })
 export class SharedModule {}

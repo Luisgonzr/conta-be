@@ -5,10 +5,11 @@ import { PrismaModule } from 'src/prisma/prisma.module';
 import { SharedModule } from 'src/shared/shared.module';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from 'src/common/strategies/jwt.strategy';
+import { MexicoInvoicingRulesService } from 'src/shared/mexico-invoicing-rules/mexico-invoicing-rules.service';
 
 @Module({
   controllers: [TaxCatalogController],
-  providers: [TaxCatalogService, JwtStrategy],
+  providers: [TaxCatalogService, JwtStrategy, MexicoInvoicingRulesService],
   imports: [
     PrismaModule,
     SharedModule,
