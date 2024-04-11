@@ -9,6 +9,9 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TaxCatalogModule } from './modules/tax-catalog/tax-catalog.module';
 import { CustomerModule } from './modules/customer/customer.module';
+import { SharedService } from './mexico-invoicing-rules/shared/shared.service';
+import { ProductAndServiceCategoryModule } from './modules/product-and-service-category/product-and-service-category.module';
+import { WebhookStripeModule } from './modules/webhook-stripe/webhook-stripe.module';
 
 @Module({
   imports: [
@@ -30,6 +33,8 @@ import { CustomerModule } from './modules/customer/customer.module';
     CustomerModule,
     AuthModule,
     TaxCatalogModule,
+    ProductAndServiceCategoryModule,
+    WebhookStripeModule,
   ],
   controllers: [AppController],
   providers: [
@@ -42,6 +47,7 @@ import { CustomerModule } from './modules/customer/customer.module';
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
     },
+    SharedService,
   ],
 })
 export class AppModule {}
