@@ -9,13 +9,14 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TaxCatalogModule } from './modules/tax-catalog/tax-catalog.module';
 import { CustomerModule } from './modules/customer/customer.module';
-import { SharedService } from './mexico-invoicing-rules/shared/shared.service';
 import { ProductAndServiceCategoryModule } from './modules/product-and-service-category/product-and-service-category.module';
 import { WebhookStripeModule } from './modules/webhook-stripe/webhook-stripe.module';
+import { SharedModule } from './shared/shared.module';
 
 @Module({
   imports: [
     PrismaModule,
+    SharedModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: `.env`,
@@ -47,7 +48,6 @@ import { WebhookStripeModule } from './modules/webhook-stripe/webhook-stripe.mod
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
     },
-    SharedService,
   ],
 })
 export class AppModule {}

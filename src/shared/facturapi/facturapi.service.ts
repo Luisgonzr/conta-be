@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import Facturapi from 'facturapi';
+import * as Facturapi from 'facturapi';
 
 @Injectable()
 export class FacturapiService {

@@ -12,4 +12,12 @@ export class SigninDto {
   @MaxLength(100)
   @MinLength(8)
   password: string;
+  @IsString()
+  @MaxLength(100)
+  @MinLength(8)
+  companyName: string;
+  @IsString()
+  @MaxLength(100)
+  @MinLength(8)
+  currentBusinessBillingPlanId: string;
 }
