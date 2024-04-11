@@ -9,10 +9,14 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TaxCatalogModule } from './modules/tax-catalog/tax-catalog.module';
 import { CustomerModule } from './modules/customer/customer.module';
+import { ProductAndServiceCategoryModule } from './modules/product-and-service-category/product-and-service-category.module';
+import { WebhookStripeModule } from './modules/webhook-stripe/webhook-stripe.module';
+import { SharedModule } from './shared/shared.module';
 
 @Module({
   imports: [
     PrismaModule,
+    SharedModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: `.env`,
@@ -30,6 +34,8 @@ import { CustomerModule } from './modules/customer/customer.module';
     CustomerModule,
     AuthModule,
     TaxCatalogModule,
+    ProductAndServiceCategoryModule,
+    WebhookStripeModule,
   ],
   controllers: [AppController],
   providers: [
