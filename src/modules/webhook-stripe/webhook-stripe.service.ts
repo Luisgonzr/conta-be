@@ -97,7 +97,7 @@ export class WebhookStripeService {
 
 
   async stripeWebhook(data: Buffer, headers: any) {
-    const stripe = new Stripe('sk_test_Xoe6kUlwSad1ZuILiRbOlnUo');
+    const stripe = new Stripe(this.configService.get('STRIPE_SECRET_KEY_TEST'));
     let event;
     const endpoint = this.configService.get('STRIPE_ENDPOINT_SECRET');
     if (endpoint) {
