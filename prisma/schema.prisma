@@ -33,19 +33,67 @@ model UserMain {
 
 // CompanyInTheMiddle is the company that the user is part of
 model Company {
-  id                          String                      @id @default(cuid())
-  isActive                    Boolean                     @default(true)
-  createdAt                   DateTime                    @default(now())
-  updatedAt                   DateTime                    @updatedAt
-  userMain                    UserMain                    @relation(fields: [userMainId], references: [id])
-  userMainId                  String                      @unique
-  secondaryUsers              UserMainOnCompany[]
-  customers                   Customer[]
-  productsAndServices         ProductAndService[]
-  productAndServiceCategories ProductAndServiceCategory[]
-  TaxCatalog                  TaxCatalog[]
-  proformaInvoices            ProformaInvoice[]
-  invoices                    Invoice[]
+  id                           String                                  @id @default(cuid())
+  name                         String?
+  email                        String?
+  isActive                     Boolean                                 @default(true)
+  createdAt                    DateTime                                @default(now())
+  updatedAt                    DateTime                                @updatedAt
+  userMain                     UserMain                                @relation(fields: [userMainId], references: [id])
+  userMainId                   String                                  @unique
+  secondaryUsers               UserMainOnCompany[]
+  customers                    Customer[]
+  productsAndServices          ProductAndService[]
+  productAndServiceCategories  ProductAndServiceCategory[]
+  TaxCatalog                   TaxCatalog[]
+  proformaInvoices             ProformaInvoice[]
+  invoices                     Invoice[]
+  companyTaxProfile            CompanyTaxProfile?
+  facturapiConfigProfile       FacturapiConfigProfile?
+  stripeId                     String?
+  stripeCheckout               StripeCheckout[]
+  businessInvoice              BusinessInvoice[]
+  currentBusinessBillingPlan   BusinessBillingPlan                     @relation(fields: [currentBusinessBillingPlanId], references: [id])
+  currentBusinessBillingPlanId String
+  historicBusinessBillingPlan  HistoricBusinessBillingPlanPerCompany[]
+  billingsPerPeriod            BillingsPerPeriod[]
+}
+
+model CompanyTaxProfile {
+  id                       String   @id @default(cuid())
+  taxId                    String?
+  taxName                  String?
+  taxSystem                String?
+  taxZipCode               String?
+  taxAddressStreet         String?
+  taxAddressExteriorNumber String?
+  isActive                 Boolean  @default(true)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+  company                  Company  @relation(fields: [companyId], references: [id])
+  companyId                String   @unique
+}
+
+model FacturapiConfigProfile {
+  id                               String   @id @default(cuid())
+  cerFileName                      String?
+  keyFileName                      String?
+  invoiceConfigLogoUrl             String?
+  invoiceConfigColorHex            String?
+  invoiceConfigNextFolioNumber     Int      @default(1)
+  invoiceConfigNextFolioNumberTest Int      @default(1)
+  invoiceConfigPdfShowCodes        Boolean  @default(true)
+  invoiceConfigPdfShowProductKey   Boolean  @default(true)
+  invoiceConfigPdfRoundUnitPrice   Boolean  @default(false)
+  invoiceConfigPdfTaxBreakdown     Boolean  @default(true)
+  facturapiOrganizationId          String?
+  facturapiApiKeyProd              String?
+  facturapiApiKeyTest              String?
+  isActive                         Boolean  @default(true)
+  createdAt                        DateTime @default(now())
+  updatedAt                        DateTime @updatedAt
+  company                          Company  @relation(fields: [companyId], references: [id])
+  companyId                        String   @unique
 }
 
 // UserMainOnCompanyInTheMiddle is the relation between the user and the company
@@ -97,9 +145,9 @@ model ProductAndService {
   description                 String
   internalIdCode              String?
   price                       Float?
-  taxCode                     String
-  taxMeasurementUnit          String
-  taxMeasurementUnitName      String
+  taxCode                     String?
+  taxMeasurementUnit          String?
+  taxMeasurementUnitName      String?
   show                        Boolean?                   @default(true)
   isService                   Boolean?                   @default(true)
   taxCatalogs                 TaxCatalog[]
@@ -226,4 +274,133 @@ model Invoice {
   company            Company          @relation(fields: [companyId], references: [id])
   companyId          String
   isActive           Boolean          @default(true)
+}
+
+// Billing and plan
+
+model StripeCheckout {
+  id                String   @id @default(cuid())
+  company           Company  @relation(fields: [companyId], references: [id])
+  companyId         String
+  stripeId          String
+  amountTotal       Float
+  cancelUrl         String
+  successUrl        String
+  currency          String
+  paymentStatus     String
+  url               String
+  status            String
+  subscription      String?
+  clientReferenceId String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// NOT FOR PROD!!
+model WebhookDummy {
+  id        String   @id @default(cuid())
+  type      String
+  event     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BusinessBillingPlan {
+  id                                    String                                  @id @default(cuid())
+  name                                  String
+  description                           String
+  price                                 Float
+  currency                              String
+  taxCode                               String?
+  taxMeasurementUnit                    String?
+  taxMeasurementUnitName                String?
+  isFree                                Boolean                                 @default(false)
+  stripeId                              String?
+  isActive                              Boolean                                 @default(true)
+  createdAt                             DateTime                                @default(now())
+  updatedAt                             DateTime                                @updatedAt
+  businessTaxCatalog                    BusinessTaxCatalog[]
+  company                               Company[]
+  historicBusinessBillingPlanPerCompany HistoricBusinessBillingPlanPerCompany[]
+}
+
+model HistoricBusinessBillingPlanPerCompany {
+  id                    String              @id @default(cuid())
+  company               Company             @relation(fields: [companyId], references: [id])
+  companyId             String
+  businessBillingPlan   BusinessBillingPlan @relation(fields: [businessBillingPlanId], references: [id])
+  businessBillingPlanId String
+  userEmail             String
+  action                String
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  isActive              Boolean             @default(true)
+}
+
+model BillingsPerPeriod {
+  id        String   @id @default(cuid())
+  company   Company  @relation(fields: [companyId], references: [id])
+  companyId String
+  userEmail String
+  startDate DateTime
+  endDate   DateTime
+  action    String
+  isPaid    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isActive  Boolean  @default(true)
+}
+
+model BusinessTaxCatalog {
+  id                     String                @id @default(cuid())
+  name                   String
+  description            String
+  taxType                String //IVA, IEPS, ISR
+  taxFactor              String //Tasa, Cuota, Exento
+  taxRate                Float
+  base                   String?               @default("100% del subtotal") //Tasa, Cuota, Exento
+  taxAWithheldByCustomer Boolean               @default(false)
+  isActive               Boolean               @default(true)
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
+  businessBillingPlan    BusinessBillingPlan[]
+}
+
+model BusinessInvoice {
+  id                 String    @id @default(cuid())
+  facturapiId        String
+  facturapiCreatedAt DateTime
+  livemode           Boolean
+  stampDate          DateTime?
+  emissionDate       DateTime?
+  cfdiVersion        String
+  organization       String
+  date               DateTime
+  verificationUrl    String
+  status             String
+  type               String
+  cancellationStatus String
+  total              Float
+  uuid               String
+  use                String
+  folioNumber        String
+  series             String
+  paymentForm        String
+  paymentMethod      String
+  currency           String
+  exchange           Float
+  legalName          String?
+  taxId              String?
+  taxZipCode         String?
+  taxSystem          String?
+  emitterLegalName   String?
+  emitterTaxId       String?
+  emitterTaxZipCode  String?
+  emitterTaxSystem   String?
+  notes              String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  company            Company   @relation(fields: [companyId], references: [id])
+  companyId          String
+  isActive           Boolean   @default(true)
 }

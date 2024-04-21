@@ -129,7 +129,11 @@ export class AuthService {
             MomentMeasurements.days,
           ),
           mainCompany: {
-            create: {},
+            create: {
+              name: signinData.companyName,
+              currentBusinessBillingPlanId:
+                signinData.currentBusinessBillingPlanId,
+            },
           },
         },
       })

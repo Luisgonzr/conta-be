@@ -7,22 +7,20 @@ import {
 import { ErrorMessages } from 'src/common/messages/error.catalog';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { GetParamsService } from 'src/shared/get-params-service/get-params.service';
+import { MexicoInvoicingRulesService } from 'src/shared/mexico-invoicing-rules/mexico-invoicing-rules.service';
 
 @Injectable()
 export class TaxCatalogService {
   constructor(
     private prismaService: PrismaService,
     private getParamsService: GetParamsService,
+    private mexicoInvoicingRulesService: MexicoInvoicingRulesService,
   ) {}
   createTaxes(body: any, currentCompany: string) {
-    if (
-      body.taxType != 'IVA' &&
-      body.taxType != 'ISR' &&
-      body.taxType != 'IEPS'
-    ) {
+    if (!this.mexicoInvoicingRulesService.isValidTaxType(body.taxType)) {
       throw new ConflictException('Error while processing request');
     }
-    if (body.taxFactor !== 'Tasa' && body.taxFactor !== 'Cuota') {
+    if (!this.mexicoInvoicingRulesService.isValidTaxFactor(body.taxFactor)) {
       throw new ConflictException('Error while processing request');
     }
     return this.prismaService.taxCatalog.create({
