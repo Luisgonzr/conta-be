@@ -296,6 +296,15 @@ model StripeCheckout {
   updatedAt         DateTime @updatedAt
 }
 
+// NOT FOR PROD!!
+model WebhookDummy {
+  id        String   @id @default(cuid())
+  type      String
+  event     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model BusinessBillingPlan {
   id                                    String                                  @id @default(cuid())
   name                                  String
