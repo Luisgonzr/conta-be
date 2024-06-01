@@ -29,12 +29,13 @@ export class WebhookStripeService {
     switch (event.type) {
       case 'customer.created':
         console.log(event.data.object);
-        const JsonCustomerString = JSON.parse(event.data.object);
+        const JsonCustomerString = JSON.stringify(event.data.object);
+        const JsonCustomer = JSON.parse(JsonCustomerString);
         const marketingEmail = await this.prismaService.marketingEmail
           .create({
             data: {
-              email: JsonCustomerString.email,
-              stripeId: JsonCustomerString.id,
+              email: JsonCustomer.email,
+              stripeId: JsonCustomer.id,
             },
           })
           .catch((error) => {
