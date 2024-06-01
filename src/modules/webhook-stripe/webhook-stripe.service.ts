@@ -38,8 +38,8 @@ export class WebhookStripeService {
         const marketingEmail = await this.prismaService.marketingEmail
           .create({
             data: {
-              email: JsonCustomer.email,
-              stripeId: JsonCustomer.id,
+              email: JsonCustomer['email'],
+              stripeId: JsonCustomer['id'],
             },
           })
           .catch((error) => {
