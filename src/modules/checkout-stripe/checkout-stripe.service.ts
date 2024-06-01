@@ -10,6 +10,63 @@ export class CheckoutStripeService {
     private readonly prismaService: PrismaService,
   ) {}
 
+  async checkoutFromLandingPage(planId: string) {
+    const plan = await this.prismaService.businessBillingPlan
+      .findUnique({
+        where: {
+          id: planId,
+        },
+      })
+      .catch((error) => {
+        console.log(error);
+        throw new Error('Error getting plan');
+      });
+    if (!plan) {
+      throw new Error('Error getting plan');
+    }
+    const stripe = new Stripe(this.configService.get('STRIPE_SECRET_KEY_TEST'));
+    if (plan.isFree) {
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price: plan.stripeId,
+            quantity: 1,
+          },
+        ],
+        payment_method_collection: 'if_required',
+        mode: 'subscription', //'payment
+        success_url: this.configService.get('STRIPE_SUCCESS_URL'),
+        cancel_url: this.configService.get(
+          'STRIPE_LANDING_CHECKOUT_CANCEL_URL',
+        ),
+      });
+      if (!session) {
+        throw new Error('Error creating session');
+      }
+      return session;
+    } else {
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price: plan.stripeId,
+            quantity: 1,
+          },
+        ],
+        mode: 'subscription', //'payment
+        success_url: this.configService.get('STRIPE_SUCCESS_URL'),
+        cancel_url: this.configService.get(
+          'STRIPE_LANDING_CHECKOUT_CANCEL_URL',
+        ),
+      });
+      if (!session) {
+        throw new Error('Error creating session');
+      }
+      return session;
+    }
+  }
+
   async stripeCheckout(companyId: string, planId: string) {
     const plan = await this.prismaService.businessBillingPlan
       .findUnique({
@@ -98,5 +155,4 @@ export class CheckoutStripeService {
     }
     return checkout;
   }
-
 }
