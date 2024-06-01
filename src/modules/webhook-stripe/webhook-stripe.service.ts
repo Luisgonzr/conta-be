@@ -28,6 +28,7 @@ export class WebhookStripeService {
     }
     switch (event.type) {
       case 'customer.created':
+        console.log(event.data.object);
         const marketingEmail = await this.prismaService.marketingEmail
           .create({
             data: {
@@ -40,6 +41,7 @@ export class WebhookStripeService {
             throw new Error('Error creating email');
           });
       case 'customer.subscription.created':
+        console.log(event.data.object);
         const email = await this.prismaService.marketingEmail.findFirst({
           where: {
             stripeId: event.data.object.customer,
@@ -66,6 +68,7 @@ export class WebhookStripeService {
         });
         break;
       case 'payment_intent.succeeded':
+        console.log(event.data.object);
         const paymentIntent = event.data.object;
         await this.prismaService.webhookDummy.create({
           data: {
@@ -75,6 +78,7 @@ export class WebhookStripeService {
         });
         break;
       case 'payment_method.attached':
+        console.log(event.data.object);
         const paymentMethod = event.data.object;
         await this.prismaService.webhookDummy.create({
           data: {
@@ -84,6 +88,7 @@ export class WebhookStripeService {
         });
         break;
       case 'checkout.session.completed':
+        console.log(event.data.object);
         const paymentMethodA = event.data.object;
         await this.prismaService.webhookDummy.create({
           data: {
@@ -93,6 +98,7 @@ export class WebhookStripeService {
         });
         break;
       case 'payment_intent.created':
+        console.log(event.data.object);
         const paymentMethodB = event.data.object;
         await this.prismaService.webhookDummy.create({
           data: {
@@ -102,6 +108,7 @@ export class WebhookStripeService {
         });
         break;
       default:
+        console.log(event.data.object);
         await this.prismaService.webhookDummy.create({
           data: {
             type: event.type,
