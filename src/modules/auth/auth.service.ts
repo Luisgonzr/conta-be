@@ -328,4 +328,37 @@ export class AuthService {
     };
     return { user, token };
   }
+
+  async createNewUser(email: string){
+    const randomString = this.utilsService.generateRandomString(32);
+    const passwordHash = await argon2.hash(randomString);
+    const verificationToken = await this.utilsService.generateRandomString(32);
+    const userMain = await this.prismaService.userMain
+      .create({
+        data: {
+          email: email,
+          password: passwordHash,
+          name: 'User',
+          verificationToken: verificationToken,
+          verificationDeadline: this.utilsService.getExpirationDate(
+            5,
+            MomentMeasurements.days,
+          ),
+          mainCompany: {
+            create: {
+              name: 'Company',
+              currentBusinessBillingPlanId: 'cluvqh06s0000yi7hrk00px9b',
+            },
+          },
+        },
+      })
+      .catch((error) => {
+        if (error instanceof PrismaClientKnownRequestError) {
+          if (error.code === 'P2002') {
+            throw new EmailTakenException();
+          }
+        }
+        throw error;
+      });
+  }
 }
