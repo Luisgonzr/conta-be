@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { MomentMeasurements, UtilsService } from 'src/shared/utils/utils.service';
+import {
+  MomentMeasurements,
+  UtilsService,
+} from 'src/shared/utils/utils.service';
 import Stripe from 'stripe';
 
 @Injectable()
@@ -46,6 +49,7 @@ export class WebhookStripeService {
             console.log(error);
             throw new Error('Error creating email');
           });
+        break;
       case 'customer.subscription.created':
         console.log(event.data.object);
         const JsonDataString = JSON.stringify(event.data.object);
@@ -55,7 +59,9 @@ export class WebhookStripeService {
             stripeId: JsonData['customer'],
           },
         });
-        const verificationToken = await this.utilsService.generateRandomString(32);
+        const verificationToken = await this.utilsService.generateRandomString(
+          32,
+        );
         const verificationDeadline = this.utilsService.getExpirationDate(
           5,
           MomentMeasurements.days,
