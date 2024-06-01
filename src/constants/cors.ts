@@ -4,5 +4,6 @@ export const CORS: CorsOptions = {
   origin: [
     'http://localhost:4200',
     process.env.FRONTEND_URL,
+    process.env.FRONTEND_URL_LANDING_WP,
   ],
 }
