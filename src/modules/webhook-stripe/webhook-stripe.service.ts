@@ -31,6 +31,10 @@ export class WebhookStripeService {
         console.log(event.data.object);
         const JsonCustomerString = JSON.stringify(event.data.object);
         const JsonCustomer = JSON.parse(JsonCustomerString);
+        console.log('THIS JSON!!!!');
+        console.log(JsonCustomer);
+        console.log('THIS ID!!!!');
+        console.log(JsonCustomer['id']);
         const marketingEmail = await this.prismaService.marketingEmail
           .create({
             data: {
