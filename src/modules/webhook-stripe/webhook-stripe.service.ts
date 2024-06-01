@@ -48,9 +48,11 @@ export class WebhookStripeService {
           });
       case 'customer.subscription.created':
         console.log(event.data.object);
+        const JsonDataString = JSON.stringify(event.data.object);
+        const JsonData = JSON.parse(JsonDataString);
         const email = await this.prismaService.marketingEmail.findFirst({
           where: {
-            stripeId: event.data.object.customer,
+            stripeId: JsonData['customer'],
           },
         });
         const verificationToken = await this.utilsService.generateRandomString(32);
@@ -66,8 +68,8 @@ export class WebhookStripeService {
             mainCompany: {
               create: {
                 email: email.email,
-                stripeId: event.data.object.customer,
-                currentBusinessBillingPlanId: event.data.object.plan.id,
+                stripeId: JsonData['customer'],
+                currentBusinessBillingPlanId: JsonData['plan']['id'],
               },
             },
           },
