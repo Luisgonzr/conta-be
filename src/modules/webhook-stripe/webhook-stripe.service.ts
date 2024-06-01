@@ -31,13 +31,8 @@ export class WebhookStripeService {
     }
     switch (event.type) {
       case 'customer.created':
-        console.log(event.data.object);
         const JsonCustomerString = JSON.stringify(event.data.object);
         const JsonCustomer = JSON.parse(JsonCustomerString);
-        console.log('THIS JSON!!!!');
-        console.log(JsonCustomer);
-        console.log('THIS ID!!!!');
-        console.log(JsonCustomer['id']);
         const marketingEmail = await this.prismaService.marketingEmail
           .create({
             data: {
@@ -51,7 +46,6 @@ export class WebhookStripeService {
           });
         break;
       case 'customer.subscription.created':
-        console.log(event.data.object);
         const JsonDataString = JSON.stringify(event.data.object);
         const JsonData = JSON.parse(JsonDataString);
         const email = await this.prismaService.marketingEmail.findFirst({
@@ -66,6 +60,12 @@ export class WebhookStripeService {
           5,
           MomentMeasurements.days,
         );
+        const currentBillingPlan =
+          await this.prismaService.businessBillingPlan.findFirst({
+            where: {
+              stripeId: JsonData['plan']['id'],
+            },
+          });
         await this.prismaService.userMain.create({
           data: {
             email: email.email,
@@ -75,7 +75,7 @@ export class WebhookStripeService {
               create: {
                 email: email.email,
                 stripeId: JsonData['customer'],
-                currentBusinessBillingPlanId: JsonData['plan']['id'],
+                currentBusinessBillingPlanId: currentBillingPlan.id,
               },
             },
           },
@@ -97,7 +97,7 @@ export class WebhookStripeService {
         await this.prismaService.webhookDummy.create({
           data: {
             type: event.type,
-            event: JSON.stringify(paymentIntent),
+            event: JSON.stringify(paymentMethod),
           },
         });
         break;
@@ -107,7 +107,7 @@ export class WebhookStripeService {
         await this.prismaService.webhookDummy.create({
           data: {
             type: event.type,
-            event: JSON.stringify(paymentIntent),
+            event: JSON.stringify(paymentMethodA),
           },
         });
         break;
@@ -117,7 +117,7 @@ export class WebhookStripeService {
         await this.prismaService.webhookDummy.create({
           data: {
             type: event.type,
-            event: JSON.stringify(paymentIntent),
+            event: JSON.stringify(paymentMethodB),
           },
         });
         break;
@@ -126,7 +126,7 @@ export class WebhookStripeService {
         await this.prismaService.webhookDummy.create({
           data: {
             type: event.type,
-            event: JSON.stringify(paymentIntent),
+            event: JSON.stringify(event.data.object),
           },
         });
         break;
