@@ -6,6 +6,7 @@ import {
   UtilsService,
 } from 'src/shared/utils/utils.service';
 import Stripe from 'stripe';
+import { WelcomeEmailService } from '../../shared/mailing/emails/welcome-email/welcome-email.service';
 
 @Injectable()
 export class WebhookStripeService {
@@ -13,7 +14,8 @@ export class WebhookStripeService {
     private readonly configService: ConfigService,
     private readonly prismaService: PrismaService,
     private readonly utilsService: UtilsService,
-  ) {}
+    private readonly welcomeEmailService: WelcomeEmailService,
+  ) { }
 
   async stripeWebhook(data: Buffer, headers: any) {
     const stripe = new Stripe(this.configService.get('STRIPE_SECRET_KEY_TEST'));
@@ -33,7 +35,7 @@ export class WebhookStripeService {
       case 'customer.created':
         const JsonCustomerString = JSON.stringify(event.data.object);
         const JsonCustomer = JSON.parse(JsonCustomerString);
-        const marketingEmail = await this.prismaService.marketingEmail
+        await this.prismaService.marketingEmail
           .create({
             data: {
               email: JsonCustomer['email'],
@@ -66,8 +68,6 @@ export class WebhookStripeService {
         });
         break;
       case 'checkout.session.completed':
-        console.log(event.data.object);
-        const paymentMethodA = event.data.object;
         const JsonObjectString = JSON.stringify(event.data.object);
         const JsonObject = JSON.parse(JsonObjectString);
         const stripeSubscriptionId = JsonObject['subscription'];
@@ -80,20 +80,22 @@ export class WebhookStripeService {
           stripeSubscriptionId,
         );
         const plan = subscription['plan']['id'];
-        console.log('Plan:', plan);
-        console.log('Subscription:', subscription);
-        console.log('Customer:', customerEmail);
-        console.log('Customer Id:', stripeCustomerId);
         const planFromDb =
           await this.prismaService.businessBillingPlan.findFirst({
             where: {
               stripeId: plan,
             },
           });
-        console.log('Plan ID from DB:', planFromDb.id);
+        const verificationToken = this.utilsService.generateRandomString(20);
+        const verificationDeadline = this.utilsService.getExpirationDate(
+          5,
+          MomentMeasurements.days,
+        );
         await this.prismaService.userMain.create({
           data: {
             email: customerEmail,
+            verificationToken: verificationToken,
+            verificationDeadline: verificationDeadline,
             mainCompany: {
               create: {
                 email: customerEmail,
@@ -103,6 +105,12 @@ export class WebhookStripeService {
               },
             },
           },
+        });
+        const url = `${this.configService.get(
+          'FRONTEND_URL'
+        )}/onboarding/${verificationToken}`;
+        await this.welcomeEmailService.sendEmail(customerEmail, {
+          url: url,
         });
         break;
       case 'payment_intent.created':

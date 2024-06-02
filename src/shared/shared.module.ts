@@ -10,6 +10,7 @@ import { VerifiedEmailService } from './mailing/emails/verified-email/verified-e
 import { GetParamsService } from './get-params-service/get-params.service';
 import { MexicoInvoicingRulesService } from './mexico-invoicing-rules/mexico-invoicing-rules.service';
 import { FacturapiService } from './facturapi/facturapi.service';
+import { WelcomeEmailService } from './mailing/emails/welcome-email/welcome-email.service';
 
 @Module({
   imports: [HttpModule, ConfigModule.forRoot()],
@@ -31,6 +32,7 @@ import { FacturapiService } from './facturapi/facturapi.service';
     GetParamsService,
     MexicoInvoicingRulesService,
     FacturapiService,
+    WelcomeEmailService,
   ],
 })
 export class SharedModule {}
