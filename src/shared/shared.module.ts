@@ -20,6 +20,7 @@ import { WelcomeEmailService } from './mailing/emails/welcome-email/welcome-emai
     VerifiedEmailService,
     ForgotPasswordEmailService,
     ResetPasswordEmailService,
+    WelcomeEmailService,
     GetParamsService,
   ],
   providers: [
