@@ -79,15 +79,29 @@ export class WebhookStripeService {
         const subscription = await stripe.subscriptions.retrieve(
           stripeSubscriptionId,
         );
-        const plan = subscription['items']['data'][0]['price']['product'];
+        const plan = subscription['plan']['id'];
         console.log('Plan:', plan);
         console.log('Subscription:', subscription);
         console.log('Customer:', customerEmail);
         console.log('Customer Id:', stripeCustomerId);
-        await this.prismaService.webhookDummy.create({
+        const planFromDb =
+          await this.prismaService.businessBillingPlan.findFirst({
+            where: {
+              stripeId: plan,
+            },
+          });
+        console.log('Plan ID from DB:', planFromDb.id);
+        await this.prismaService.userMain.create({
           data: {
-            type: event.type,
-            event: JSON.stringify(paymentMethodA),
+            email: customerEmail,
+            mainCompany: {
+              create: {
+                email: customerEmail,
+                stripeId: stripeCustomerId,
+                stripeSubscriptionId: stripeSubscriptionId,
+                currentBusinessBillingPlanId: planFromDb.id,
+              },
+            },
           },
         });
         break;
