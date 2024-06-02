@@ -45,45 +45,6 @@ export class WebhookStripeService {
             throw new Error('Error creating email');
           });
         break;
-      case 'customer.subscription.created':
-        console.log('Customer Subscription Created!!');
-        const JsonDataString = JSON.stringify(event.data.object);
-        const JsonData = JSON.parse(JsonDataString);
-        console.log('Email:', JsonData['customer']);
-        const email = await this.prismaService.marketingEmail.findFirst({
-          where: {
-            stripeId: JsonData['customer'],
-          },
-        });
-        console.log('Email Marketing:', email);
-        const verificationToken = await this.utilsService.generateRandomString(
-          32,
-        );
-        const verificationDeadline = this.utilsService.getExpirationDate(
-          5,
-          MomentMeasurements.days,
-        );
-        const currentBillingPlan =
-          await this.prismaService.businessBillingPlan.findFirst({
-            where: {
-              stripeId: JsonData['plan']['id'],
-            },
-          });
-        await this.prismaService.userMain.create({
-          data: {
-            email: email.email,
-            verificationToken: verificationToken,
-            verificationDeadline: verificationDeadline,
-            mainCompany: {
-              create: {
-                email: email.email,
-                stripeId: JsonData['customer'],
-                currentBusinessBillingPlanId: currentBillingPlan.id,
-              },
-            },
-          },
-        });
-        break;
       case 'payment_intent.succeeded':
         console.log(event.data.object);
         const paymentIntent = event.data.object;
@@ -107,6 +68,22 @@ export class WebhookStripeService {
       case 'checkout.session.completed':
         console.log(event.data.object);
         const paymentMethodA = event.data.object;
+        const JsonObjectString = JSON.stringify(event.data.object);
+        const JsonObject = JSON.parse(JsonObjectString);
+        const stripeSubscriptionId = JsonObject['subscription'];
+        const stripeCustomerId = JsonObject['customer'];
+        const customerEmail = JsonObject['customer_details']['email'];
+        const stripe = new Stripe(
+          this.configService.get('STRIPE_SECRET_KEY_TEST'),
+        );
+        const subscription = await stripe.subscriptions.retrieve(
+          stripeSubscriptionId,
+        );
+        const plan = subscription['items']['data'][0]['price']['product'];
+        console.log('Plan:', plan);
+        console.log('Subscription:', subscription);
+        console.log('Customer:', customerEmail);
+        console.log('Customer Id:', stripeCustomerId);
         await this.prismaService.webhookDummy.create({
           data: {
             type: event.type,

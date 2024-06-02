@@ -38,7 +38,7 @@ export class CheckoutStripeService {
         mode: 'subscription', //'payment
         success_url: this.configService.get('STRIPE_SUCCESS_URL'),
         cancel_url: this.configService.get(
-          'STRIPE_LANDING_CHECKOUT_CANCEL_URL',
+          'STRIPE_LANDING_CHECKOUT_CANCEL_URL ',
         ),
       });
       if (!session) {

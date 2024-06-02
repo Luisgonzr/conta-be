@@ -15,7 +15,7 @@ datasource db {
 
 model MarketingEmail {
   id        String   @id @default(cuid())
-  email     String   
+  email     String
   stripeId  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -59,6 +59,7 @@ model Company {
   companyTaxProfile            CompanyTaxProfile?
   facturapiConfigProfile       FacturapiConfigProfile?
   stripeId                     String?
+  stripeSubscriptionId         String?
   stripeCheckout               StripeCheckout[]
   businessInvoice              BusinessInvoice[]
   currentBusinessBillingPlan   BusinessBillingPlan                     @relation(fields: [currentBusinessBillingPlanId], references: [id])
