@@ -20,7 +20,6 @@ export class ResponseInterceptor implements NestInterceptor {
     context: ExecutionContext,
     next: CallHandler,
   ): Promise<Observable<any>> {
-
     const isPublic = this.reflector.get<boolean>(
       'isPublic',
       context.getHandler(),
@@ -32,13 +31,23 @@ export class ResponseInterceptor implements NestInterceptor {
     return next.handle().pipe(
       map(async (data) => {
         const request = context.switchToHttp().getRequest();
-        const token = await jwt.sign(
-          request.user,
-          this.config.get('JWT_SECRET'),
-          {
+        let token = '';
+        console.log(request.user.data);
+        console.log(request.platform);
+        if (request.platform === 'onboarding') {
+          token = await jwt.sign(
+            { data: request.user.data },
+            this.config.get('JWT_SECRET_ONBOARDING'),
+            {
+              expiresIn: this.config.get('JWT_EXPIRES_IN'),
+            },
+          );
+        } else {
+          token = await jwt.sign(request.user, this.config.get('JWT_SECRET'), {
             expiresIn: this.config.get('JWT_EXPIRES_IN'),
-          },
-        );
+          });
+        }
+
         return { data, token };
       }),
     );

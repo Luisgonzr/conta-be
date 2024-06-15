@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, Param, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { Public } from 'src/common/decorators/public.decorator';
 import { OnboardingService } from './onboarding.service';
 import {
@@ -7,7 +7,11 @@ import {
   SetPasswordDto,
   SetTaxProfileDto,
 } from './dtos';
+import { User } from 'src/common/decorators/user.decorator';
+import { UserInfo } from 'src/common/interfaces/user.info';
+import { OnboardingGuard } from 'src/common/guards/onboarding.guard';
 
+@UseGuards(OnboardingGuard)
 @Controller('onboarding')
 export class OnboardingController {
   constructor(private readonly OnboardingService: OnboardingService) {}
@@ -21,33 +25,39 @@ export class OnboardingController {
     );
   }
 
-  @Public()
-  @Post('set-password/:code')
+  @Post('set-password')
   @HttpCode(200)
   async setPassword(
     @Body() setPasswordDto: SetPasswordDto,
-    @Param('code') code: string,
+    @User() user: UserInfo,
   ) {
-    return { code, ...setPasswordDto };
+    console.log(setPasswordDto, user.id);
+    return await this.OnboardingService.setPassword(setPasswordDto, user.id);
   }
 
   @Public()
-  @Post('set-company/:code')
+  @Post('set-company')
   @HttpCode(200)
   async setCompany(
     @Body() setCompanyDto: SetCompanyDto,
-    @Param('code') code: string,
+    @User() user: UserInfo,
   ) {
-    return { code, ...setCompanyDto };
+    return await this.OnboardingService.setCompany(
+      setCompanyDto,
+      user.currentCompany,
+    );
   }
 
   @Public()
-  @Post('set-tax-profile/:code')
+  @Post('set-tax-profile')
   @HttpCode(200)
   async setTaxProfile(
     @Body() setTaxProfileDto: SetTaxProfileDto,
-    @Param('code') code: string,
+    @User() user: UserInfo,
   ) {
-    return { code, ...setTaxProfileDto };
+    return await this.OnboardingService.setTaxProfile(
+      setTaxProfileDto,
+      user.currentCompany,
+    );
   }
 }

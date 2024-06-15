@@ -1,4 +1,4 @@
-import { Equals, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsString, MaxLength, MinLength } from 'class-validator';
 
 export class SetPasswordDto {
   @MaxLength(40)
@@ -11,6 +11,6 @@ export class SetPasswordDto {
   @IsString()
   @MaxLength(20)
   @MinLength(6)
-  @Equals('password')
+  //@Equals('password')
   confirmPassword: string;
 }
