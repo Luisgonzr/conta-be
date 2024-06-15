@@ -108,7 +108,7 @@ export class WebhookStripeService {
         });
         const url = `${this.configService.get(
           'FRONTEND_URL'
-        )}/onboarding/${verificationToken}`;
+        )}/onboarding/${verificationToken}/${customerEmail}`;
         await this.welcomeEmailService.sendEmail(customerEmail, {
           url: url,
         });
