@@ -14,6 +14,7 @@ import { WebhookStripeModule } from './modules/webhook-stripe/webhook-stripe.mod
 import { SharedModule } from './shared/shared.module';
 import { PlanModule } from './modules/plan/plan.module';
 import { CheckoutStripeModule } from './modules/checkout-stripe/checkout-stripe.module';
+import { OnboardingModule } from './modules/onboarding/onboarding.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { CheckoutStripeModule } from './modules/checkout-stripe/checkout-stripe.
     WebhookStripeModule,
     PlanModule,
     CheckoutStripeModule,
+    OnboardingModule,
   ],
   controllers: [AppController],
   providers: [
